@@ -1,0 +1,33 @@
+---
+
+- hosts: all #Beginning of a statements begin with a "-"
+  become: true
+  tasks:
+
+  - name: look if curl is installed
+    ansible.builtin.command:
+      cmd: sudo yum install curl
+      args:
+        state: present
+        creates: /usr/bin/curl
+    when: ansible_distribution == "..."
+
+  - name: install BIM
+    block:
+      - name: check if BIM already installed
+        ansible.builtin.file:
+          path: /tmp/bee_installation_manager
+          mode: '0755'
+
+    rescue:
+      - name: install BIM packages
+        ansible.builtin.command:
+          cmd: sudo curl -o bee_installation_manager https://baculasystems.com/ml/bee_installation_manager
+          args:
+            chdir: /tmp/
+            creates: /tmp/bee_installation_manager
+      - name: make BIM executable
+        ansible.builtin.command:
+          cmd: sudo chmod +x bee_installation_manager
+          args:
+            chdir: /tmp/
