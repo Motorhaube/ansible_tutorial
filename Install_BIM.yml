@@ -1,15 +1,13 @@
 ---
 
 - hosts: all #Beginning of a statements begin with a "-"
-  become: true
+  become: yes
   tasks:
 
   - name: look if curl is installed
-    ansible.builtin.command:
-      cmd: sudo yum install curl
-      args:
-        state: present
-        creates: /usr/bin/curl
+    ansible.builtin.package:
+      name: curl
+      state: present
     when: ansible_distribution == "..."
 
   - name: install BIM
@@ -23,11 +21,33 @@
       - name: install BIM packages
         ansible.builtin.command:
           cmd: sudo curl -o bee_installation_manager https://baculasystems.com/ml/bee_installation_manager
-          args:
-            chdir: /tmp/
-            creates: /tmp/bee_installation_manager
+        args:
+          chdir: /tmp/
+          creates: /tmp/bee_installation_manager
       - name: make BIM executable
         ansible.builtin.command:
           cmd: sudo chmod +x bee_installation_manager
-          args:
-            chdir: /tmp/
+        args:
+          chdir: /tmp/
+
+  - name: Activate BIM for director without bweb
+    block:
+      - name: run BIM
+        ansible.builtin.expect:
+          command: ./bee_installation_manager -t DIR
+          responses:
+            "Press ENTER to start":
+              - ""
+            "Y/n": ["yes", "yes", "no", "yes"]
+            "'18.0.7' by default":
+              - "1"
+            "plugin selection":
+              - ""
+            "Y/n/r":
+              - "yes"
+        timeout: null
+        register: command_output
+        args:
+          chdir: /tmp/
+      - debug: var=command_output
+
