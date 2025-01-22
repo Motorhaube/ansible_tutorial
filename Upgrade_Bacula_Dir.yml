@@ -4,6 +4,17 @@
   become: yes
   tasks:
 
+  - name: Backup of important Files
+    block:
+      - name: Backup etc and working
+        ansible.builtin.command:
+          cmd: sudo cp -r /opt/bacula/etc /home/billythekid/BackupBacula
+          cmd: sudo cp -r /opt/bacula/working /home/billythekid/BackupBacula
+      - name: Backup Bacula Catalog
+        ansible.builtin.command:
+          cmd: sudo -u bacula /opt/bacula/scripts/make_catalog_backup.pl BaculaCatalog
+          cmd: cp /opt/bacula/working/bacula.sql /home/billythekid/BackupBacula
+
   - name: look if curl is installed
     ansible.builtin.package:
       name: curl
