@@ -30,7 +30,7 @@
         args:
           chdir: /tmp/
 
-  - name: Activate BIM for director without bweb
+  - name: Upgrade DIR with BIM
     block:
       - name: run BIM
         ansible.builtin.expect:
@@ -49,5 +49,8 @@
         register: command_output
         args:
           chdir: /tmp/
+      - name: restart services
+        ansible.builtin.shell:
+          cmd: sudo systemctl restart bacula-dir.service ; sudo systemctl restart bacula-sd.service ; sudo systemctl restart bacula-fd.service
       - debug: var=command_output
 
