@@ -8,8 +8,8 @@
     block:
       - name: Backup etc and working
         ansible.builtin.command:
-          cmd: sudo cp -r /opt/bacula/etc /home/billythekid/BackupBacula
-          cmd: sudo cp -r /opt/bacula/working /home/billythekid/BackupBacula
+          cmd: sudo cp -r /opt/bacula/etc /home/temis-admin/BackupBacula
+          cmd: sudo cp -r /opt/bacula/working /home/temis-admin/BackupBacula
       - name: Backup Bacula Catalog
         ansible.builtin.command:
           cmd: sudo -u bacula /opt/bacula/scripts/make_catalog_backup.pl BaculaCatalog
