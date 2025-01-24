@@ -1,0 +1,19 @@
+---
+
+- hosts: all
+  become: yes
+  vars:
+    packages:
+      - python3
+      - wireshark
+  tasks:
+
+  - name: multiple packages
+    ansible.builtin.command:
+      cmd: sudo apt install "{{ item }}"
+    loop:
+      - python3
+      - wireshark
+    register: command_output
+
+  - debug: var=command_output

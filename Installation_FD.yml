@@ -1,0 +1,73 @@
+---
+- hosts: all
+  become: yes
+  vars_prompt:
+    - name: fd_link
+    prompt: What is the BWEB configuration link for the FD?
+  vars:
+    bacula_version: 18.0.7
+    download_url: https://www.baculasystems.com/dl/BundesamtfurSicherheitinderInformationstechnikBSI-30ba188128e540d1a1c64c
+    director_adress: 10.50.104.101
+    bacula_packages:
+      - gnupg
+      - postgresql
+     # - postgresql-client
+      - httpd
+     # - libapache2-mod-php
+     # - php-sqlite
+      - php-pgsql
+      - curl
+      - patch
+      - php
+      - php-cli
+      - php-bcmath
+      - php-curl
+      - php-xml
+      - php-json
+      - php-ldap
+      - php-mysql
+      - php-pdo
+      - php-pgsql
+      - php-intl
+
+  tasks:
+
+  - name: look if all packages are on latest state
+    ansible.builtin.command:
+      cmd: sudo yum install "{{ item }}"
+    loop: "{{ bacula_packages }}"
+
+  - name: look if curl is installed
+    ansible.builtin.package:
+      name: curl
+      state: present
+    when: ansible_distribution == "RedHat"
+
+  - name: install BIM
+    block:
+      - name: check if BIM already installed
+        ansible.builtin.file:
+          path: /tmp/bee_installation_manager
+          mode: '0755'
+
+    rescue:
+      - name: install BIM packages
+        ansible.builtin.command:
+          cmd: sudo curl -o bee_installation_manager https://baculasystems.com/ml/bee_installation_manager
+        args:
+          chdir: /tmp/
+          creates: /tmp/bee_installation_manager
+      - name: make BIM executable
+        ansible.builtin.command:
+          cmd: sudo chmod +x bee_installation_manager
+        args:
+          chdir: /tmp/
+
+  - name: Install FD with BIM
+    block:
+      - name: run BIM
+        ansible.builtin.command:
+          cmd: ./bee_installation_manager -s -t FD -da "{{ download_url }}" -v "{{ bacula_version }}" -l "{{ fd_link }}" -d "{{ director_adress }}" -o
+          cmd: sudo systemctl restart bacula-fd.service
+        register: command_output
+      - debug: var=command_output

@@ -1,25 +1,20 @@
 ---
 
-- hosts: all #Beginning of a statements begin with a "-"
+- hosts: all
   become: yes
   tasks:
 
   - name: Backup of important Files
-    block:
-      - name: Backup etc and working
-        ansible.builtin.command:
-          cmd: sudo cp -r /opt/bacula/etc /home/temis-admin/BackupBacula
-          cmd: sudo cp -r /opt/bacula/working /home/temis-admin/BackupBacula
-      - name: Backup Bacula Catalog
-        ansible.builtin.command:
-          cmd: sudo -u bacula /opt/bacula/scripts/make_catalog_backup.pl BaculaCatalog
-          cmd: cp /opt/bacula/working/bacula.sql /home/temis-admin/BackupBacula
+  - name: Backup etc and working
+    ansible.builtin.command:
+      cmd: sudo cp -r /opt/bacula/etc /home/temis-admin/BackupBacula
+      cmd: sudo cp -r /opt/bacula/working /home/temis-admin/BackupBacula
 
   - name: look if curl is installed
     ansible.builtin.package:
       name: curl
       state: present
-    when: ansible_distribution == "Redhat"
+    when: ansible_distribution == "..."
 
   - name: install BIM
     block:
@@ -45,12 +40,12 @@
     block:
       - name: run BIM
         ansible.builtin.expect:
-          command: ./bee_installation_manager -t DIR
+          command: ./bee_installation_manager
           responses:
             "Press ENTER to start":
               - ""
-            "Y/n": ["yes", "yes", "no", "yes"]
-            "by default":
+            "Y/n": ["yes", "yes", "no", "no", "yes"]
+            "'18.0.7' by default":
               - "1"
             "plugin selection":
               - ""
@@ -64,4 +59,3 @@
         ansible.builtin.shell:
           cmd: sudo systemctl restart bacula-dir.service ; sudo systemctl restart bacula-sd.service ; sudo systemctl restart bacula-fd.service
       - debug: var=command_output
-
